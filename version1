@@ -1,0 +1,85 @@
+numbered_blanks  = ["__1__","__2__","__3__","__4__","__5__","__6__", "__7__"]
+#paragraph is the quiz that is parsed by word_in_pos.  it is also the quiz that the user must answer. the quiz contains real words and replacement words(like __1__ and __2__)
+paragraph1 = "The Beatles members are __1__ Lennon, __2__ McCartney, __3__ Harrison and __4__ Starr."
+paragraph2 = "The Who members are __1__ Daltrey, __2__ Townshend,  __3__ Entwistle and __4__ Moon"
+paragraph3 = "The Rolling Stones are __1__ Jones, __2__ Stewart, __3__ Jagger, __4__ Richards, __5__ Wyman and __6__ Watts"
+#answer list provides the to the replacement words in paragraph
+answer_list1 = ["John", "Paul", "George", "Ringo"]
+answer_list2 = ["Roger", "Pete", "John", "Keith"]
+answer_list3 = ["Brian", "Ian", "Mick", "Keith", "Bill", "Charlie"]
+#word_in_pos (parts of speech) is the function that will find the parse the paragraph (aka the quiz) in to single words
+# as it parses, it will separate real words from the replacement words (like __1__ and __2__) and return replacement words
+def word_in_pos(word, numbered_blanks): #parses paragraph for replacement word like __1__
+    for pos in numbered_blanks:
+        if pos in word:
+            return pos # if a word is found, the function will return the word to play_game
+    return None
+
+#too_many_attampts is used to exit the game when a user answer the fill in the blank question incorrectly.
+def too_many_attempts():
+    print "Too many attempts. Game over"
+    exit()
+
+#user_input_check will take in the replacement word and find the position of the replacement word in the numbered blanks list
+# when it finds a match (between replacement and a value in numbered blanks), it will then take the index position of the answer list
+# and compare it to the user input.  if there is a match, the function will send the answer to play_game.  If there is no match
+# the function will give the user a total of three attempts before the game ends.
+def user_input_check(replacement, answer_list, replaced,correct):
+    attempts = 0 # attempts is used to count how many times a user incorrectly answered a question
+    max_attempts = 3 #max attempts could be a global variable and passed in via the function
+    while attempts < max_attempts: #while loop is used to return correct user input
+        index = 0 #index provides the location in the list
+        user_input = raw_input("Type in a replacement for: " + replacement + " ")
+        for number in numbered_blanks:
+            if number == replacement:
+                if user_input.upper() == answer_list[index].upper(): #will check to see if user input matches answer in answer list
+                    print "Correct. You have got a match!"
+                    correct = "correct"
+                    return user_input, correct #returns correct user input to play game fuction
+
+                attempts = attempts + 1 #when user input does not match the value in the answer_list, the check will fall out of the if loop and add 1 to number of attempt2 
+                print "Number of attempts taken ", attempts, " for question number ", index+1
+            index = index + 1
+    too_many_attempts() #to get here, the user must have attempted to answer the same question three times.  game over.
+
+#pick_level is the first function called by play_game.  it is used once at the start of the game.
+#it will set the game difficulty of the game, however after three failed attempts to pick a level, the Easy level is selected automagicly!
+def pick_level():
+    attempts = 0 # attempts is used to count how many times a user incorrectly answered a question
+    max_attempts = 3 #max attempts could be a global variable and passed in via the function
+    while attempts < max_attempts:
+        user_input1 = raw_input("Pick a level of difficulty Easy, Medium, Hard \n")
+        if user_input1.upper() == "Easy".upper():
+            return answer_list1, paragraph1 #returns paragraph and answers
+        elif user_input1.upper() == "Medium".upper():
+            return answer_list2, paragraph2 #returns paragraph and answers
+        elif user_input1.upper() == "Hard".upper():
+            return answer_list3, paragraph3 #returns paragraph and answers
+        else:
+            attempts = attempts +1
+            print "You have entered an incorrect choice, please try again."
+
+    print "We have selected Easy for you." #added a default to force the user to play the game if the user could not pick a correct level
+    return answer_list1, paragraph1
+
+#play_game is the function runs the game.  It calls out to other functions, and prints out the quiz (aka paragraphs from the global variables section)         
+def play_game():
+    answer_list, paragraph = pick_level()
+    print paragraph   
+    replaced = []
+    correct = "incorrect"
+    paragraph = paragraph.split()
+    for word in paragraph:
+        replacement = word_in_pos(word, numbered_blanks)
+        if replacement != None:
+            user_input,correct = user_input_check(replacement,answer_list, replaced,correct)
+            word = word.replace(replacement, user_input)
+            replaced.append(word)
+        else:
+           replaced.append(word)
+           if correct == "correct": # prints correct answer plus the next word the paragraph
+               print " ".join(replaced)
+    replaced = " ".join(replaced)
+    print replaced
+   
+play_game()
